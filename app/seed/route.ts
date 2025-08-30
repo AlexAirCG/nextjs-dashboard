@@ -1,8 +1,14 @@
-import bcrypt from 'bcrypt';
-import postgres from 'postgres';
-import { invoices, customers, revenue, users } from '../lib/placeholder-data';
+import postgres from "postgres";
+import {
+  invoices,
+  customers,
+  revenue,
+  users,
+  weathers,
+} from "../lib/placeholder-data";
+import bcrypt from "bcryptjs";
 
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
 async function seedUsers() {
   await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
@@ -23,7 +29,7 @@ async function seedUsers() {
         VALUES (${user.id}, ${user.name}, ${user.email}, ${hashedPassword})
         ON CONFLICT (id) DO NOTHING;
       `;
-    }),
+    })
   );
 
   return insertedUsers;
@@ -48,8 +54,8 @@ async function seedInvoices() {
         INSERT INTO invoices (customer_id, amount, status, date)
         VALUES (${invoice.customer_id}, ${invoice.amount}, ${invoice.status}, ${invoice.date})
         ON CONFLICT (id) DO NOTHING;
-      `,
-    ),
+      `
+    )
   );
 
   return insertedInvoices;
@@ -73,8 +79,8 @@ async function seedCustomers() {
         INSERT INTO customers (id, name, email, image_url)
         VALUES (${customer.id}, ${customer.name}, ${customer.email}, ${customer.image_url})
         ON CONFLICT (id) DO NOTHING;
-      `,
-    ),
+      `
+    )
   );
 
   return insertedCustomers;
@@ -94,11 +100,29 @@ async function seedRevenue() {
         INSERT INTO revenue (month, revenue)
         VALUES (${rev.month}, ${rev.revenue})
         ON CONFLICT (month) DO NOTHING;
-      `,
-    ),
+      `
+    )
   );
 
   return insertedRevenue;
+}
+
+async function myTab() {
+  await sql`
+      CREATE TABLE IF NOT EXISTS weather (
+        city varchar(80),
+        temp int
+      )
+    `;
+  const insertMyTab = await Promise.all(
+    weathers.map(
+      (weather) => sql`
+      INSERT INTO weather (city, temp)
+      VALUES (${weather.city}, ${weather.temp});
+    `
+    )
+  );
+  return insertMyTab;
 }
 
 export async function GET() {
@@ -108,9 +132,10 @@ export async function GET() {
       seedCustomers(),
       seedInvoices(),
       seedRevenue(),
+      myTab(),
     ]);
 
-    return Response.json({ message: 'Database seeded successfully' });
+    return Response.json({ message: "Database seeded successfully" });
   } catch (error) {
     return Response.json({ error }, { status: 500 });
   }

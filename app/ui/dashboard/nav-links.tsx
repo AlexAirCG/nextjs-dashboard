@@ -47,7 +47,12 @@ export default function NavLinks() {
       })}
       <Link
         href="/dashboard/baty"
-        className="flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-200 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3"
+        className={clsx(
+          "flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-200 p-3 text-sm font-medium hover:bg-sky-200 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3",
+          {
+            "bg-sky-200 text-blue-600": pathName === "/dashboard/baty",
+          }
+        )}
       >
         <BiBomb size={25} />
         Baty
